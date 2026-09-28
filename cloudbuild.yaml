@@ -1,7 +1,7 @@
 steps:
   # notifications
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       [
         'build',
         '-t',
@@ -11,12 +11,12 @@ steps:
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
-    ['push', 'us-east4-docker.pkg.dev/sleepr-509119/notifications']
+    args:
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/notifications']
 
   # auth
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       [
         'build',
         '-t',
@@ -26,12 +26,12 @@ steps:
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
-    ['push', 'us-east4-docker.pkg.dev/sleepr-509119/auth']
+    args:
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/auth']
 
   # reservations
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       [
         'build',
         '-t',
@@ -41,12 +41,12 @@ steps:
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
-    ['push', 'us-east4-docker.pkg.dev/sleepr-509119/reservations']
+    args:
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/reservations']
 
   # payments
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       [
         'build',
         '-t',
@@ -56,5 +56,5 @@ steps:
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
-    ['push', 'us-east4-docker.pkg.dev/sleepr-509119/payments']
+    args:
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/payments']

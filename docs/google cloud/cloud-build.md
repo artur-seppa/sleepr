@@ -84,6 +84,57 @@ Dois detalhes que não são óbvios:
   autenticação já vem da service account do build, que roda dentro do próprio
   projeto.
 
+### ⚠️ Erro que tomei aqui — `could not find expected ':'`
+
+O primeiro trigger falhou em **1 segundo**, com duração `—` no painel: nem
+chegou a subir um container.
+
+```
+failed unmarshalling build config cloudbuild.yaml: yaml: line 18: could not find expected ':'
+```
+
+"Duração `—`" já é a pista: o build morreu na leitura do arquivo, antes de
+qualquer step. Ou seja, não era permissão nem trigger — era o YAML.
+
+O culpado estava na linha **15**, não na 18:
+
+```yaml
+  - name: 'gcr.io/cloud-builders/docker'
+    args:                                       # <- chave na coluna 4
+    ['push', 'us-east4-docker.pkg.dev/...']     # <- valor na coluna 4 TAMBÉM
+```
+
+Em YAML, o valor de uma chave em bloco precisa estar **mais indentado** que a
+chave. Na mesma coluna, o parser não lê aquilo como o valor de `args:` — lê como
+uma **nova chave** do mesmo mapa, e fica esperando os dois-pontos dela. Ele só
+desiste na linha 18, quando encontra o `- name:` do próximo step. Por isso o
+erro aponta um lugar onde não há nada de errado.
+
+Os steps de `build` passavam porque o `[` deles já estava na coluna 6. Só os
+quatro `push` estavam rasos. A correção é só indentação:
+
+```yaml
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/notifications']
+```
+
+**Lição:** o número da linha num erro de YAML aponta onde o parser *desistiu*,
+não onde o erro *está*. O problema costuma estar acima.
+
+E dá para não descobrir isso pelo console: um parse local pega o mesmo erro em
+segundos, antes de commitar.
+
+```bash
+python3 -c "import yaml;yaml.safe_load(open('cloudbuild.yaml'))"
+```
+
+```bash
+# ou, se preferir ver o build pelo terminal em vez do painel
+gcloud builds list --limit=3 --format="value(id,status,statusDetail)"
+gcloud builds log <BUILD_ID>
+```
+
 São 8 steps no total: um `build` + um `push` para cada um dos quatro
 microserviços (`notifications`, `auth`, `reservations`, `payments`).
 
