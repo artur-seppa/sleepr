@@ -163,13 +163,48 @@ O build roda com uma service account do projeto, e ela precisa do papel
 **Artifact Registry Writer** para o `docker push` passar. Se o pipeline quebrar
 no push com `denied` / `permission_denied`, é isso — e não o `cloudbuild.yaml`.
 
-Também é comum, em projetos novos, o build falhar logo no começo reclamando de
-*logging*. Nesse caso é preciso declarar explicitamente onde vão os logs:
+### ⚠️ Segundo erro — `build.service_account is specified`
+
+Com o YAML consertado, o build passou da leitura do arquivo e morreu na
+validação, em 3 segundos:
+
+```
+invalid argument: if 'build.service_account' is specified, the build must either
+(a) specify 'build.logs_bucket', (b) use the REGIONAL_USER_OWNED_BUCKET
+build.options.default_logs_bucket_behavior option, or (c) use either
+CLOUD_LOGGING_ONLY / NONE logging options
+```
+
+Não é erro de sintaxe nem de permissão: é uma **escolha que o Google parou de
+fazer por mim**.
+
+Historicamente o Cloud Build rodava com uma service account gerenciada por ele e
+despejava os logs num bucket do Cloud Storage que era dele também. Em projetos
+novos, o build roda com uma service account **do meu projeto**
+(`build.service_account`) — e aí não existe mais um bucket "da casa" para onde
+mandar log. O Google se recusa a adivinhar e exige que eu diga onde os logs vão
+parar, listando as três saídas possíveis.
+
+Escolhi a (c), que é a mais simples: mandar tudo para o Cloud Logging e não usar
+bucket nenhum.
 
 ```yaml
 options:
   logging: CLOUD_LOGGING_ONLY
 ```
+
+| opção | o que faz |
+|---|---|
+| `CLOUD_LOGGING_ONLY` | logs só no Cloud Logging — sem bucket para criar ou pagar |
+| `NONE` | sem log; só serve se você não quiser depurar nada |
+| `logs_bucket` | você cria um bucket no GCS e aponta para ele |
+| `default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET` | o Cloud Build cria o bucket no seu projeto, na região do build |
+
+`options` é um campo **de topo** do `cloudbuild.yaml`, irmão de `steps` — não vai
+dentro de nenhum step.
+
+**Lição:** vale ler o erro até o fim antes de procurar culpado. Ele não só diz o
+que está errado, como **lista as saídas** — bastava escolher uma.
 
 ## ⚠️ Pontos a revisar neste `cloudbuild.yaml`
 
