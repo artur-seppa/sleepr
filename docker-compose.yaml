@@ -1,0 +1,75 @@
+services:
+  reservations:
+    build:
+      context: .
+      dockerfile: apps/reservations/Dockerfile
+      target: development
+    command: pnpm run start:dev reservations
+    env_file:
+      - ./apps/reservations/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      # Volume anônimo: preserva o node_modules instalado na imagem (Alpine/musl),
+      # sem ser sobreposto pelo node_modules do host via bind mount acima.
+      - /app/node_modules
+    depends_on:
+      - mongo
+
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+      target: development
+    command: pnpm run start:dev auth
+    env_file:
+      - ./apps/auth/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      # Volume anônimo: preserva o node_modules instalado na imagem (Alpine/musl),
+      # sem ser sobreposto pelo node_modules do host via bind mount acima.
+      - /app/node_modules
+    depends_on:
+      - mongo
+
+  payments:
+    build:
+      context: .
+      dockerfile: apps/payments/Dockerfile
+      target: development
+    command: pnpm run start:dev payments
+    env_file:
+      - ./apps/payments/.env
+    volumes:
+      - .:/app
+      # Volume anônimo: preserva o node_modules instalado na imagem (Alpine/musl),
+      # sem ser sobreposto pelo node_modules do host via bind mount acima.
+      - /app/node_modules
+
+  notifications:
+    build:
+      context: .
+      dockerfile: apps/notifications/Dockerfile
+      target: development
+    command: pnpm run start:dev notifications
+    env_file:
+      - ./apps/notifications/.env
+    volumes:
+      - .:/app
+      # Volume anônimo: preserva o node_modules instalado na imagem (Alpine/musl),
+      # sem ser sobreposto pelo node_modules do host via bind mount acima.
+      - /app/node_modules
+
+  mongo:
+    image: mongo:6.0
+    container_name: sleepr-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
