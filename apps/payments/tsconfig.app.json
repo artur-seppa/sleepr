@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "noEmit": true,
+    "rootDir": "../.."
+  },
+  "include": ["src/**/*", "../../libs/common/src/dto/create-charge.dto.ts"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+}
