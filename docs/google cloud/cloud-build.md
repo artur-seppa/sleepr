@@ -208,21 +208,43 @@ que está errado, como **lista as saídas** — bastava escolher uma.
 
 ## ⚠️ Pontos a revisar neste `cloudbuild.yaml`
 
-Escrevendo esta nota, três coisas do arquivo atual não fecham com o que aprendi
-no [container.md](./introducao/container.md):
+Três coisas do arquivo inicial não fechavam com o que aprendi no
+[container.md](./introducao/container.md). A primeira derrubou o build; as
+outras duas continuam pendentes:
 
-**1. O caminho da imagem para no repositório.** A anatomia completa é
-`host/projeto/repo/imagem:tag`, e o arquivo usa:
+**1. O caminho da imagem parava no repositório — confirmado no build.** A
+anatomia completa é `host/projeto/repo/imagem:tag`, e o arquivo usava:
 
 ```
 us-east4-docker.pkg.dev/sleepr-509119/notifications
 └──────── host ────────┘ └── projeto ─┘ └── repo ──┘   ← falta o nome da imagem
 ```
 
-Manualmente eu empurrei para `.../notifications/production`. Confirmar no
-primeiro build se o Artifact Registry aceita o push direto na raiz do
-repositório ou se precisa do segmento da imagem — se precisar, é só acrescentar
-`/production` nos oito lugares.
+O `build` (step #0) passou sem reclamar — o Docker aceita qualquer string como
+tag. Quem recusou foi o **registry**, no `push`:
+
+```
+name invalid: Missing image name.
+Pushes should be of the form docker push HOST-NAME/PROJECT-ID/REPOSITORY/IMAGE
+ERROR: build step 1 "gcr.io/cloud-builders/docker" failed: step exited with non-zero status: 1
+```
+
+Ou seja: o Artifact Registry **não** aceita push na raiz do repositório. O
+repositório é uma pasta, não um destino — precisa do nome da imagem dentro dele.
+A correção foi acrescentar `/production` (o mesmo nome que usei no push manual)
+nos oito lugares:
+
+```yaml
+'us-east4-docker.pkg.dev/sleepr-509119/notifications/production'
+```
+
+Dois aprendizados aqui:
+
+- **`docker build -t` não valida nada.** A tag é só um rótulo local; o erro de
+  caminho só aparece no push, quando o registry opina. Um caminho errado passa
+  reto por todo o build.
+- **A numeração dos steps no log é 0-based.** `Finished Step #1` era o *segundo*
+  step — o push do `notifications` —, não o primeiro.
 
 **2. Sem tag, tudo vira `latest`.** Toda build sobrescreve a anterior e não há
 como saber qual commit gerou a imagem que está rodando. O Cloud Build expõe

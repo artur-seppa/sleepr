@@ -5,14 +5,14 @@ steps:
       [
         'build',
         '-t',
-        'us-east4-docker.pkg.dev/sleepr-509119/notifications',
+        'us-east4-docker.pkg.dev/sleepr-509119/notifications/production',
         '-f',
         'apps/notifications/Dockerfile',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/notifications']
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/notifications/production']
 
   # auth
   - name: 'gcr.io/cloud-builders/docker'
@@ -20,14 +20,14 @@ steps:
       [
         'build',
         '-t',
-        'us-east4-docker.pkg.dev/sleepr-509119/auth',
+        'us-east4-docker.pkg.dev/sleepr-509119/auth/production',
         '-f',
         'apps/auth/Dockerfile',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/auth']
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/auth/production']
 
   # reservations
   - name: 'gcr.io/cloud-builders/docker'
@@ -35,14 +35,14 @@ steps:
       [
         'build',
         '-t',
-        'us-east4-docker.pkg.dev/sleepr-509119/reservations',
+        'us-east4-docker.pkg.dev/sleepr-509119/reservations/production',
         '-f',
         'apps/reservations/Dockerfile',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/reservations']
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/reservations/production']
 
   # payments
   - name: 'gcr.io/cloud-builders/docker'
@@ -50,13 +50,13 @@ steps:
       [
         'build',
         '-t',
-        'us-east4-docker.pkg.dev/sleepr-509119/payments',
+        'us-east4-docker.pkg.dev/sleepr-509119/payments/production',
         '-f',
         'apps/payments/Dockerfile',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/payments']
+      ['push', 'us-east4-docker.pkg.dev/sleepr-509119/payments/production']
 options:
   logging: CLOUD_LOGGING_ONLY
